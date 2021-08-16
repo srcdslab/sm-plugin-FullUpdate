@@ -1,0 +1,20 @@
+"Games"
+{
+	"#default"
+	{
+		"#supported"
+		{
+			"engine"		"orangebox"
+			"engine"		"orangebox_valve"
+			"engine"		"css"
+		}
+
+		"Offsets"
+		{
+			"CBaseClient::UpdateAcknowledgedFramecount"
+			{
+				"linux"		"44"
+			}
+		}
+	}
+}
