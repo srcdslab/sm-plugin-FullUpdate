@@ -36,11 +36,10 @@ public void OnPluginStart()
 
 		if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseClient::UpdateAcknowledgedFramecount"))
 		{
-			CloseHandle(hGameData);
+			delete hGameData;
 			SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseClient::UpdateAcknowledgedFramecount\" failed!");
 			return;
 		}
-		CloseHandle(hGameData);
 
 		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 
