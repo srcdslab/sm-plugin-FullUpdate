@@ -7,9 +7,12 @@
 
 Handle g_hCBaseClient_UpdateAcknowledgedFramecount;
 Handle g_hCBaseClient_OnRequestFullUpdate;
+Handle g_hGetClient;
 
 Address m_nDeltaTick;
 Address m_nForceWaitForTick;
+
+Address g_pBaseServer;
 
 int g_iLastFullUpdate[MAXPLAYERS + 1] = { 0, ... };
 
@@ -18,7 +21,7 @@ public Plugin myinfo =
 	name = "FullUpdate",
 	author = "BotoX, PŠΣ™ SHUFEN, maxime1907",
 	description = "Serverside cl_fullupdate",
-	version = "1.2"
+	version = "1.3.0"
 }
 
 public void OnPluginStart()
@@ -28,6 +31,26 @@ public void OnPluginStart()
 		SetFailState("Couldn't load FullUpdate.games game config!");
 		return;
 	}
+
+#if !defined GetClientIClient
+	g_pBaseServer = GameConfGetAddress(hGameData, "CBaseServer");
+	if(g_pBaseServer == Address_Null)
+	{
+		SetFailState("Couldn't get BaseServer address!");
+		return;
+	}
+
+	StartPrepSDKCall(SDKCall_Raw);
+	if (!PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseServer::GetClient"))
+	{
+		delete hGameData;
+		SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseServer::GetClient\" failed!");
+		return;
+	}
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	g_hGetClient = EndPrepSDKCall();
+#endif
 
 	if (GetEngineVersion() != Engine_CSGO)
 	{
@@ -176,6 +199,13 @@ public Action Command_FullUpdate(int client, int args)
 	FullUpdate(client);
 	return Plugin_Handled;
 }
+
+#if !defined GetClientIClient
+stock Address GetClientIClient(int client)
+{
+	return SDKCall(g_hGetClient, g_pBaseServer, client-1);
+}
+#endif
 
 stock Address GetBaseClient(int client)
 {
