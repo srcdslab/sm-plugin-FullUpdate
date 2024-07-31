@@ -6,7 +6,6 @@
 		{
 			"engine"	"orangebox_valve"
 			"engine"	"css"
-			"engine"	"csgo"
 		}
 
 		"Addresses"
@@ -122,7 +121,6 @@
 		{
 			"engine"	"left4dead"
 			"engine"	"left4dead2"
-			"engine"	"csgo"
 		}
 
 		"Offsets"
@@ -132,33 +130,6 @@
 				"windows"	"6"
 				"linux"		"7"
 				"mac"		"7"
-			}
-		}
-	}
-
-	"csgo"
-	{
-		"Offsets"
-		{
-			// a1[134] * 4
-			"m_nDeltaTick"
-			{
-				"linux"		"536"
-			}
-			// a1[206] * 4
-			"m_nForceWaitForTick"
-			{
-				"linux"		"824"
-			}
-		}
-
-		"Signatures"
-		{
-			// Str: "Sending full update to Client %s (%s)\n"  ^  CBaseClient::OnRequestFullUpdate
-			"CBaseClient::OnRequestFullUpdate"
-			{
-				"library"	"engine"
-				"linux"		"\x55\x89\xE5\x53\x83\xEC\x14\x8B\x5D\x08\xC7\x44\x24\x04\x00\x00\x00\x00\x8D\x83\x24\x02\x00\x00"
 			}
 		}
 	}

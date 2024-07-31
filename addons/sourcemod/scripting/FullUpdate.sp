@@ -6,11 +6,7 @@
 #include <FullUpdate>
 
 Handle g_hCBaseClient_UpdateAcknowledgedFramecount;
-Handle g_hCBaseClient_OnRequestFullUpdate;
 Handle g_hGetClient;
-
-Address m_nDeltaTick;
-Address m_nForceWaitForTick;
 
 Address g_pBaseServer;
 
@@ -21,7 +17,7 @@ public Plugin myinfo =
 	name = "FullUpdate",
 	author = "BotoX, PŠΣ™ SHUFEN, maxime1907",
 	description = "Serverside cl_fullupdate",
-	version = "1.3.0"
+	version = "1.3.1"
 }
 
 public void OnPluginStart()
@@ -52,56 +48,24 @@ public void OnPluginStart()
 	g_hGetClient = EndPrepSDKCall();
 #endif
 
-	if (GetEngineVersion() != Engine_CSGO)
+	// void CBaseClient::UpdateAcknowledgedFramecount()
+	StartPrepSDKCall(SDKCall_Raw);
+	if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseClient::UpdateAcknowledgedFramecount"))
 	{
-		// void CBaseClient::UpdateAcknowledgedFramecount()
-		StartPrepSDKCall(SDKCall_Raw);
-
-		if(!PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseClient::UpdateAcknowledgedFramecount"))
-		{
-			delete hGameData;
-			SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseClient::UpdateAcknowledgedFramecount\" failed!");
-			return;
-		}
-
-		PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-
-		g_hCBaseClient_UpdateAcknowledgedFramecount = EndPrepSDKCall();
+		delete hGameData;
+		SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseClient::UpdateAcknowledgedFramecount\" failed!");
+		return;
 	}
-	else
-	{
-		// void CBaseClient::OnRequestFullUpdate(char const *pchReason)
-		StartPrepSDKCall(SDKCall_Raw);
-		if (!PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CBaseClient::OnRequestFullUpdate")) {
-			delete hGameData;
-			SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, \"CBaseClient::OnRequestFullUpdate\") failed!");
-			return;
-		}
-		PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
-		g_hCBaseClient_OnRequestFullUpdate = EndPrepSDKCall();
 
-		int offset = hGameData.GetOffset("m_nDeltaTick");
-		if (offset == -1) {
-			delete hGameData;
-			SetFailState("Cannot get offset CBaseClient->m_nDeltaTick");
-			return;
-		}
-		m_nDeltaTick = view_as<Address>(offset);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 
-		offset = hGameData.GetOffset("m_nForceWaitForTick");
-		if (offset == -1) {
-			delete hGameData;
-			SetFailState("Cannot get offset CBaseClient->m_nForceWaitForTick");
-			return;
-		}
-		m_nForceWaitForTick = view_as<Address>(offset);
-	}
+	g_hCBaseClient_UpdateAcknowledgedFramecount = EndPrepSDKCall();
 
 	delete hGameData;
 
+	RegConsoleCmd("fullupdate", Command_FullUpdate);
 	RegConsoleCmd("sm_fullupdate", Command_FullUpdate);
 	AddCommandListener(Command_cl_fullupdate, "cl_fullupdate");
-	RegConsoleCmd("fullupdate", Command_FullUpdate);
 }
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -125,39 +89,11 @@ bool FullUpdate(int client)
 	if (IsFakeClient(client))
 		return false;
 
-	if (GetEngineVersion() != Engine_CSGO)
-	{
-		Address pIClient = GetBaseClient(client);
-		if (!pIClient)
-			return false;
+	Address pIClient = GetBaseClient(client);
+	if (!pIClient)
+		return false;
 
-		SDKCall(g_hCBaseClient_UpdateAcknowledgedFramecount, pIClient, -1);
-	}
-	else
-	{
-		Address pIClient = GetBaseClient(client);
-		if (!pIClient)
-			return false;
-
-		int iDeltaTick = LoadFromAddress(pIClient + m_nDeltaTick, NumberType_Int32);
-		int iForceWaitForTick = LoadFromAddress(pIClient + m_nForceWaitForTick, NumberType_Int32);
-
-		if (iForceWaitForTick > 0) {
-			return false;
-		}
-		else {
-			if (iDeltaTick == -1)
-				return false;
-
-			char sReason[128];
-			FormatEx(sReason, sizeof(sReason), "%N called this function by 'sm_fullupdate' command", client);
-
-			SDKCall(g_hCBaseClient_OnRequestFullUpdate, pIClient, sReason);
-		}
-
-		// get acknowledged client frame
-		StoreToAddress(pIClient + m_nDeltaTick, -1, NumberType_Int32);
-	}
+	SDKCall(g_hCBaseClient_UpdateAcknowledgedFramecount, pIClient, -1);
 
 	g_iLastFullUpdate[client] = GetTime();
 	return true;
