@@ -5,6 +5,9 @@
 #include <sdktools>
 #include <FullUpdate>
 
+GlobalForward g_hForward_StatusOK;
+GlobalForward g_hForward_StatusNotOK;
+
 Handle g_hCBaseClient_UpdateAcknowledgedFramecount;
 Handle g_hGetClient;
 
@@ -17,7 +20,8 @@ public Plugin myinfo =
 	name = "FullUpdate",
 	author = "BotoX, PŠΣ™ SHUFEN, maxime1907",
 	description = "Serverside cl_fullupdate",
-	version = "1.3.1"
+	version = FullUpdate_VERSION,
+	url = "https://github.com/srcdslab/sm-plugin-FullUpdate"
 }
 
 public void OnPluginStart()
@@ -32,6 +36,7 @@ public void OnPluginStart()
 	g_pBaseServer = GameConfGetAddress(hGameData, "CBaseServer");
 	if(g_pBaseServer == Address_Null)
 	{
+		delete hGameData;
 		SetFailState("Couldn't get BaseServer address!");
 		return;
 	}
@@ -71,9 +76,31 @@ public void OnPluginStart()
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("ClientFullUpdate", Native_FullUpdate);
+
+	g_hForward_StatusOK = CreateGlobalForward("FullUpdate_OnPluginOK", ET_Ignore);
+	g_hForward_StatusNotOK = CreateGlobalForward("FullUpdate_OnPluginNotOK", ET_Ignore);
+
 	RegPluginLibrary("FullUpdate");
 
 	return APLRes_Success;
+}
+
+public void OnAllPluginsLoaded()
+{
+	SendForward_Available();
+}
+
+public void OnPluginPauseChange(bool pause)
+{
+	if (pause)
+		SendForward_NotAvailable();
+	else
+		SendForward_Available();
+}
+
+public void OnPluginEnd()
+{
+	SendForward_NotAvailable();
 }
 
 public void OnClientConnected(int client)
@@ -151,4 +178,16 @@ stock Address GetBaseClient(int client)
 
 	// The IClient vtable is +4 from the IGameEventListener2 (CBaseClient) vtable due to multiple inheritance.
 	return pIClientTmp - view_as<Address>(4);
+}
+
+stock void SendForward_Available()
+{
+	Call_StartForward(g_hForward_StatusOK);
+	Call_Finish();
+}
+
+stock void SendForward_NotAvailable()
+{
+	Call_StartForward(g_hForward_StatusNotOK);
+	Call_Finish();
 }
