@@ -5,9 +5,6 @@
 #include <sdktools>
 #include <FullUpdate>
 
-GlobalForward g_hForward_StatusOK;
-GlobalForward g_hForward_StatusNotOK;
-
 Handle g_hCBaseClient_UpdateAcknowledgedFramecount;
 Handle g_hGetClient;
 
@@ -77,30 +74,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	CreateNative("ClientFullUpdate", Native_FullUpdate);
 
-	g_hForward_StatusOK = CreateGlobalForward("FullUpdate_OnPluginOK", ET_Ignore);
-	g_hForward_StatusNotOK = CreateGlobalForward("FullUpdate_OnPluginNotOK", ET_Ignore);
-
 	RegPluginLibrary("FullUpdate");
 
 	return APLRes_Success;
-}
-
-public void OnAllPluginsLoaded()
-{
-	SendForward_Available();
-}
-
-public void OnPluginPauseChange(bool pause)
-{
-	if (pause)
-		SendForward_NotAvailable();
-	else
-		SendForward_Available();
-}
-
-public void OnPluginEnd()
-{
-	SendForward_NotAvailable();
 }
 
 public void OnClientConnected(int client)
@@ -178,16 +154,4 @@ stock Address GetBaseClient(int client)
 
 	// The IClient vtable is +4 from the IGameEventListener2 (CBaseClient) vtable due to multiple inheritance.
 	return pIClientTmp - view_as<Address>(4);
-}
-
-stock void SendForward_Available()
-{
-	Call_StartForward(g_hForward_StatusOK);
-	Call_Finish();
-}
-
-stock void SendForward_NotAvailable()
-{
-	Call_StartForward(g_hForward_StatusNotOK);
-	Call_Finish();
 }
