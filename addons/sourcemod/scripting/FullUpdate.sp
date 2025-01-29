@@ -17,7 +17,8 @@ public Plugin myinfo =
 	name = "FullUpdate",
 	author = "BotoX, PŠΣ™ SHUFEN, maxime1907",
 	description = "Serverside cl_fullupdate",
-	version = "1.3.1"
+	version = FullUpdate_VERSION,
+	url = "https://github.com/srcdslab/sm-plugin-FullUpdate"
 }
 
 public void OnPluginStart()
@@ -32,6 +33,7 @@ public void OnPluginStart()
 	g_pBaseServer = GameConfGetAddress(hGameData, "CBaseServer");
 	if(g_pBaseServer == Address_Null)
 	{
+		delete hGameData;
 		SetFailState("Couldn't get BaseServer address!");
 		return;
 	}
@@ -71,6 +73,7 @@ public void OnPluginStart()
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("ClientFullUpdate", Native_FullUpdate);
+
 	RegPluginLibrary("FullUpdate");
 
 	return APLRes_Success;
