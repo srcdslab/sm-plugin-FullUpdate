@@ -13,9 +13,9 @@ This repository contains **FullUpdate**, a SourcePawn plugin for SourceMod that 
 ## Technical Environment
 
 - **Language**: SourcePawn (.sp files)
-- **Platform**: SourceMod 1.11+ (configured in sourceknight.yaml)
-- **Build System**: SourceKnight with GitHub Actions CI/CD
-- **Compiler**: SourcePawn compiler (spcomp) via SourceKnight
+- **Platform**: SourceMod 1.12+
+- **Build System**: Native GitHub Actions CI/CD
+- **Compiler**: SourcePawn compiler (spcomp) via rumblefrog/setup-sp
 - **Dependencies**: SourceMod, MultiColors (for include files)
 
 ## Project Structure
@@ -31,7 +31,6 @@ This repository contains **FullUpdate**, a SourcePawn plugin for SourceMod that 
 ├── .github/
 │   ├── workflows/ci.yml           # Build and release automation
 │   └── dependabot.yml            # Dependency updates
-├── sourceknight.yaml             # Build configuration
 └── README.md
 ```
 
@@ -55,24 +54,21 @@ This repository contains **FullUpdate**, a SourcePawn plugin for SourceMod that 
 
 ## Build System
 
-### SourceKnight Configuration
-- **File**: `sourceknight.yaml`
-- **Target**: Compiles `FullUpdate.sp` to `FullUpdate.smx`
-- **Dependencies**: Automatically downloads SourceMod and MultiColors
-- **Output**: Places compiled plugin in `/addons/sourcemod/plugins`
+### GitHub Actions Configuration
+- **File**: `.github/workflows/ci.yml`
+- **Target**: Compiles `FullUpdate.sp` to `FullUpdate.smx` via `spcomp`
+- **Dependencies**: Cloned at build time (SourceMod via rumblefrog/setup-sp, MultiColors via git clone)
+- **Output**: Places compiled plugin in `addons/sourcemod/plugins`
 
 ### Building Locally
 ```bash
-# SourceKnight build (if available)
-sourceknight build
-
-# Manual compilation (alternative)
-spcomp addons/sourcemod/scripting/FullUpdate.sp -o=addons/sourcemod/plugins/FullUpdate.smx
+# Manual compilation
+spcomp -i addons/sourcemod/scripting/include addons/sourcemod/scripting/FullUpdate.sp -o addons/sourcemod/plugins/FullUpdate.smx
 ```
 
 ### CI/CD Pipeline
 - **Trigger**: Push, PR, or manual dispatch
-- **Build**: Uses `maxime1907/action-sourceknight@v1`
+- **Build**: Native GitHub Actions steps using `rumblefrog/setup-sp`
 - **Package**: Creates deployable archive with plugin and gamedata
 - **Release**: Auto-tags and releases on main/master branch
 
