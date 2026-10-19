@@ -21,6 +21,10 @@
 				{
 					"signature"	"sv"
 				}
+				"linux64"
+				{
+					"signature"	"sv"
+				}
 				"mac"
 				{
 					"signature"	"sv"
@@ -40,6 +44,7 @@
 			{
 				"library"	"engine"
 				"linux"		"@sv"
+				"linux64"	"@sv"
 				"mac"		"@sv"
 			}
 		}
@@ -67,6 +72,10 @@
 				{
 					"signature"	"sv"
 				}
+				"linux64"
+				{
+					"signature"	"sv"
+				}
 				"mac"
 				{
 					"signature"	"sv"
@@ -86,6 +95,7 @@
 			{
 				"library"	"engine"
 				"linux"		"@sv"
+				"linux64"	"@sv"
 				"mac"		"@sv"
 			}
 		}
@@ -106,11 +116,21 @@
 			{
 				"windows"	"6"
 				"linux"		"7"
+				"linux64"	"7"
 				"mac"		"7"
 			}
 			"CBaseClient::UpdateAcknowledgedFramecount"
 			{
 				"linux"		"44"
+				"linux64"	"44"
+			}
+			// IClient comes after the IGameEventListener2 vtable pointer in CBaseClient
+			"CBaseClient::IClient"
+			{
+				"windows"	"4"
+				"linux"		"4"
+				"linux64"	"8"
+				"mac"		"4"
 			}
 		}
 	}
