@@ -4,8 +4,8 @@
 #define _FullUpdate_Included
 
 #define FullUpdate_V_MAJOR   "1"
-#define FullUpdate_V_MINOR   "3"
-#define FullUpdate_V_PATCH   "2"
+#define FullUpdate_V_MINOR   "4"
+#define FullUpdate_V_PATCH   "0"
 
 #define FullUpdate_VERSION   FullUpdate_V_MAJOR..."."...FullUpdate_V_MINOR..."."...FullUpdate_V_PATCH
 
