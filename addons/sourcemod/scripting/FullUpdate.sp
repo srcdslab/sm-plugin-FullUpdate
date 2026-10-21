@@ -30,7 +30,7 @@ public void OnPluginStart()
 	}
 
 #if !defined GetClientIClient
-	g_pBaseServer = GameConfGetAddress(hGameData, "CBaseServer");
+	g_pBaseServer = hGameData.GetAddress("CBaseServer");
 	if(g_pBaseServer == Address_Null)
 	{
 		delete hGameData;
