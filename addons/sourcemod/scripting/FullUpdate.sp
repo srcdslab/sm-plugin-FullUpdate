@@ -9,6 +9,7 @@ Handle g_hCBaseClient_UpdateAcknowledgedFramecount;
 Handle g_hGetClient;
 
 Address g_pBaseServer;
+int g_iIClientOffset = 4;
 
 int g_iLastFullUpdate[MAXPLAYERS + 1] = { 0, ... };
 
@@ -45,7 +46,7 @@ public void OnPluginStart()
 		SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseServer::GetClient\" failed!");
 		return;
 	}
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Address, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	g_hGetClient = EndPrepSDKCall();
 #endif
@@ -62,6 +63,10 @@ public void OnPluginStart()
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 
 	g_hCBaseClient_UpdateAcknowledgedFramecount = EndPrepSDKCall();
+
+	int iOffset = hGameData.GetOffset("CBaseClient::IClient");
+	if (iOffset != -1)
+		g_iIClientOffset = iOffset;
 
 	delete hGameData;
 
@@ -142,7 +147,10 @@ public Action Command_FullUpdate(int client, int args)
 #if !defined GetClientIClient
 stock Address GetClientIClient(int client)
 {
-	return SDKCall(g_hGetClient, g_pBaseServer, client-1);
+	// SDKType_Address results come back through a by-ref argument (64-bit Address).
+	Address pIClient;
+	SDKCall(g_hGetClient, g_pBaseServer, pIClient, client-1);
+	return pIClient;
 }
 #endif
 
@@ -152,6 +160,6 @@ stock Address GetBaseClient(int client)
 	if(!pIClientTmp)
 		return Address_Null;
 
-	// The IClient vtable is +4 from the IGameEventListener2 (CBaseClient) vtable due to multiple inheritance.
-	return pIClientTmp - view_as<Address>(4);
+	// The IClient vtable comes after the IGameEventListener2 (CBaseClient) one due to multiple inheritance.
+	return pIClientTmp - view_as<Address>(g_iIClientOffset);
 }
