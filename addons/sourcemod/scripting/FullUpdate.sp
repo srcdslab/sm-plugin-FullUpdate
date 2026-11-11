@@ -46,7 +46,12 @@ public void OnPluginStart()
 		SetFailState("PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, \"CBaseServer::GetClient\" failed!");
 		return;
 	}
+#if SOURCEMOD_V_MAJOR == 1 && SOURCEMOD_V_MINOR < 13
+	// SM 1.12 has no SDKType_Address (x86 only): the pointer comes back as plain data
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+#else
 	PrepSDKCall_SetReturnInfo(SDKType_Address, SDKPass_Plain);
+#endif
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	g_hGetClient = EndPrepSDKCall();
 #endif
@@ -147,10 +152,14 @@ public Action Command_FullUpdate(int client, int args)
 #if !defined GetClientIClient
 stock Address GetClientIClient(int client)
 {
+#if SOURCEMOD_V_MAJOR == 1 && SOURCEMOD_V_MINOR < 13
+	return view_as<Address>(SDKCall(g_hGetClient, g_pBaseServer, client-1));
+#else
 	// SDKType_Address results come back through a by-ref argument (64-bit Address).
 	Address pIClient;
 	SDKCall(g_hGetClient, g_pBaseServer, pIClient, client-1);
 	return pIClient;
+#endif
 }
 #endif
 
